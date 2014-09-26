@@ -15,5 +15,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceInject {
 	public int value();
+	/**
+	 * 为了区分R.color.xxx与R.dimen.xxx
+	 * @return
+	 */
 	public int type() default 1;
 }

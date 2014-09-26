@@ -5,11 +5,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 /**
- * 注入过滤
+ * 值注入进行过滤
  * @author mokai
  *
  */
-public abstract class ViewFilter {
+public abstract class InjectFilter {
 	public String textViewFileter(int viewId, String value, TextView view) {
 		return value;
 	}

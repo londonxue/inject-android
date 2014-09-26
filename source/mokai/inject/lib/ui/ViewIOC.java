@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,21 +16,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 /**
- * UI注入类(View)
+ * 页面注入类
  * 
- * 一、View注入值
- * 二种调用方式：
- * 	1、Map数据
- *  	new V().setImageLoaderOption(options).setFormat("field_customer_%s").inValues(findViewById(R.id.ll_vals), dataMap);
- *  		
- *  2、Bundle数据
- *  	new V().setImageLoaderOption(options).setFormat("field_customer_%s").inValues(findViewById(R.id.ll_vals), i.getExtras());
+ * 1、详情页面的值注入
  * 
- * 二、View值获取，一般用于填写页面
+ * 2、填写页面的值获取
  * 
- * 三、重置View值
- *  
- *  
+ * 3、填写页面的值重置
+ * 
+ *
  * @author mokai
  * 
  */
@@ -40,11 +32,11 @@ public class ViewIOC {
 	private static final String TAG="V";
 	private static Field[] fields;
 	private String format="%s";
-	private ViewFilter viewFilter;
+	private InjectFilter viewFilter;
 	
-	public void init(Class rIdClazz){
+	public ViewIOC(Class rIdClazz){
 		if(fields==null) fields = rIdClazz.getDeclaredFields();
-		viewFilter = new ViewFilter(){};
+		viewFilter = new InjectFilter(){};
 	}
 	
 	/**
@@ -65,7 +57,7 @@ public class ViewIOC {
 	 * 设置View过滤，重写的方法中如果返回null则代表已处理，程序将跳过设置Value
 	 * @return 
 	 */
-	public  ViewIOC setViewFilter(ViewFilter filter){
+	public  ViewIOC setViewFilter(InjectFilter filter){
 		if(filter!=null) this.viewFilter=filter;
 		return this;
 	}
@@ -87,7 +79,6 @@ public class ViewIOC {
 		}
 	}
 
-	
 	public  void inValues(View view, Bundle bundle) {
 		if (view == null || bundle == null)
 			return;
@@ -157,41 +148,6 @@ public class ViewIOC {
 		}
 	}
 	
-	/**
-	 * 将值注入到对象中
-	 * @param obj
-	 * @param map
-	 */
-	public void inObject(Object obj,Map map){
-		map = formatMap(map);
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
-			for (Entry entry : (Set<Map.Entry>)map.entrySet()) {
-				if(field.getName().equals(entry.getKey())){
-					try {
-						field.set(obj, entry.getValue());
-					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-	
-	private Map formatMap(Map map) {
-		//格式化key
-		if(format!=null && "".equals(format)){
-			Map newMap = new HashMap();
-			for (Entry<String,Object> entry : (Set<Entry<String,Object>>)map.entrySet()) {
-				newMap.put(String.format(format, entry.getKey()), entry.getValue());
-			}
-			format = "";
-			map = newMap;
-		}
-		return map;
-	}
 	
 	/**
 	 * 自定义插件
@@ -279,5 +235,18 @@ public class ViewIOC {
 	private static String overflow(String str,int length){
 		if(str==null || length<=0) return str;
 		return str.length()>length?str.substring(0, length)+"...":str;
+	}
+	
+	private Map formatMap(Map map) {
+		//格式化key
+		if(format!=null && !"".equals(format)){
+			Map newMap = new HashMap();
+			for (Entry<String,Object> entry : (Set<Entry<String,Object>>)map.entrySet()) {
+				newMap.put(String.format(format, entry.getKey()), entry.getValue());
+			}
+			format = "";
+			map = newMap;
+		}
+		return map;
 	}
 }

@@ -39,8 +39,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 
 /**
- * IOC注入
+ * 对象的注入
  * 
+ * 1、activity自动注入layout文件
+ * 2、Activity对象属性注入
+ * 3、自定义对象属性的注入
  * @author mokai
  *
  */
@@ -53,14 +56,19 @@ public class ObjectIOC {
 	private static final HashMap<String, Integer> layoutIds = new HashMap<String, Integer>();
 
 	/**
-	 * 为Activity自动注入layout， Activity命名格式为XXXXActivity
-	 * layout文件命名为activity_XXXX（XXXX小写） 时才有效
+	 * 为Activity自动绑定Layout文件 不用再手动调用setContentView()  一般封装在BaseActivity里，实现layout自动绑定的功能 
 	 * 
-	 * @param activity 要自动注入的activity
-	 * @param rLayoutClsss 你当前项目所在的R.layout.class
+	 * 绑定规则：
+	 * 	只限于Activity自动绑定
+	 * 	Activity命名格式:XXXActivity,否则绑定失败
+	 * 	Layout文件位于当前项目，且命名格式:activity_XXXX(XXXX小写),否则绑定失败
+	 * 
+	 * 调用方式:ObjectIOC.layoutInject(this, R.layout.class);
+	 * 
+	 * @param activity 要自动绑定的activity
+	 * @param rLayoutClsss 你当前项目所在的R.layout.class,切记是当前项目
 	 *
 	 */
-
 	public static void layoutInject(Activity activity,Class rLayoutClsss) {
 		if(activity==null || rLayoutClsss==null) return;
 		String activityName = activity.getClass().getSimpleName();
@@ -84,57 +92,10 @@ public class ObjectIOC {
 		}
 	}
 
-	/**
-	 * 针对View与对象的注入
-	 * 
-	 * @param obj
-	 * @param targetParentView
-	 */
-	public static void viewInject(Object obj, View targetParentView) {
-		Class clazz = obj.getClass();
-		List<Field> fields = new ArrayList();
-		do {
-			Field[] fieldsArray = clazz.getDeclaredFields();
-			if (fieldsArray != null && fieldsArray.length > 0) {
-				fields.addAll(Arrays.asList(fieldsArray));
-			}
-		} while ((clazz = clazz.getSuperclass()) != null
-				&& clazz != Object.class);
-
-		if (fields != null && fields.size() > 0) {
-			for (Field field : fields) {
-				try {
-					field.setAccessible(true);
-					Class typeClazz = field.getType();
-					if (field.get(obj) != null)
-						continue;
-					// 页面注入
-					ViewInject viewInject = field
-							.getAnnotation(ViewInject.class);
-					if (viewInject != null) {
-						int viewId = viewInject.id();
-						field.set(obj, targetParentView.findViewById(viewId));
-						setListener(field, viewInject.click(), Method.Click,
-								obj);
-						setListener(field, viewInject.longClick(),
-								Method.LongClick, obj);
-						setListener(field, viewInject.itemClick(),
-								Method.ItemClick, obj);
-						setListener(field, viewInject.itemLongClick(),
-								Method.itemLongClick, obj);
-						continue;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					
-					Log.e(TAG, "自动注入field失败:" + e.getMessage());
-				}
-			}
-		}
-	}
+	
 
 	/**
-	 * 针对于Activity属性注入
+	 * Activity注解注入。主要用于对象属性与view、资源、系统服务的注入
 	 * 
 	 * @param mActivity
 	 */
@@ -310,6 +271,57 @@ public class ObjectIOC {
 		}
 	}
 
+	/**
+	 * 自定义对象属性的注入
+	 * 
+	 * @param obj
+	 * @param targetParentView
+	 */
+	public static void objectInject(Object obj, View targetParentView) {
+		Class clazz = obj.getClass();
+		List<Field> fields = new ArrayList();
+		do {
+			Field[] fieldsArray = clazz.getDeclaredFields();
+			if (fieldsArray != null && fieldsArray.length > 0) {
+				fields.addAll(Arrays.asList(fieldsArray));
+			}
+		} while ((clazz = clazz.getSuperclass()) != null
+				&& clazz != Object.class);
+
+		if (fields != null && fields.size() > 0) {
+			for (Field field : fields) {
+				try {
+					field.setAccessible(true);
+					Class typeClazz = field.getType();
+					if (field.get(obj) != null)
+						continue;
+					// 页面注入
+					ViewInject viewInject = field
+							.getAnnotation(ViewInject.class);
+					if (viewInject != null) {
+						int viewId = viewInject.id();
+						field.set(obj, targetParentView.findViewById(viewId));
+						setListener(field, viewInject.click(), Method.Click,
+								obj);
+						setListener(field, viewInject.longClick(),
+								Method.LongClick, obj);
+						setListener(field, viewInject.itemClick(),
+								Method.ItemClick, obj);
+						setListener(field, viewInject.itemLongClick(),
+								Method.itemLongClick, obj);
+						continue;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					
+					Log.e(TAG, "自动注入field失败:" + e.getMessage());
+				}
+			}
+		}
+	}
+	
+	
+	
 	private static void setListener(Field field, String methodName,
 			Method method, Object targetHandler) throws Exception {
 		if (methodName == null || methodName.trim().length() == 0)
