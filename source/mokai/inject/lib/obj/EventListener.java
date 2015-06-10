@@ -72,7 +72,6 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 	
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
-		
 		invokeItemSelectMethod(handler,itemSelectMethod,arg0,arg1,arg2,arg3);
 	}
 	
@@ -83,13 +82,11 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 	
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		
 		invokeItemClickMethod(handler,itemClickMethod,arg0,arg1,arg2,arg3);
 	}
 	
 	@Override
-	public void onClick(View v) {
-		
+	public void onClick(View v) {	
 		invokeClickMethod(handler, clickMethod, v);
 	}
 	
@@ -98,15 +95,21 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 		if(handler == null) return null;
 		Method method = null;
 		try{   
-			method = handler.getClass().getMethod(methodName,View.class);
+			View v = (View)params[0];
+			method = handler.getClass().getMethod(methodName,v.getClass());
 			if(method!=null)
 				return method.invoke(handler, params);	
 			else
 				throw new RuntimeException("no such method:"+methodName);
 		}catch(Exception e){
 			e.printStackTrace();
+			try{
+				if(method==null)  method = handler.getClass().getMethod(methodName,View.class);
+				if(method!=null)  return method.invoke(handler, params);	
+			}catch(Exception e1){
+				e1.printStackTrace();
+			}
 		}
-		
 		return null;
 		
 	}
@@ -116,8 +119,8 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 		if(handler == null) return false;
 		Method method = null;
 		try{   
-			//public boolean onLongClick(View v)
-			method = handler.getClass().getMethod(methodName,View.class);
+			View v = (View)params[0];
+			method = handler.getClass().getMethod(methodName,v.getClass());
 			if(method!=null){
 				Object obj = method.invoke(handler, params);
 				return obj==null?false:Boolean.valueOf(obj.toString());	
@@ -126,8 +129,16 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 				throw new RuntimeException("no such method:"+methodName);
 		}catch(Exception e){
 			e.printStackTrace();
+			try{
+				if(method==null) method =  handler.getClass().getMethod(methodName,View.class);
+				if(method!=null){
+					Object obj = method.invoke(handler, params);
+					return obj==null?false:Boolean.valueOf(obj.toString());	
+				}
+			}catch(Exception e1){
+				e1.printStackTrace();
+			}
 		}
-		
 		return false;
 		
 	}
@@ -147,7 +158,6 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		return null;
 	}
 	
@@ -167,7 +177,6 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		return false;
 	}
 	
@@ -185,7 +194,6 @@ public class EventListener implements OnClickListener, OnLongClickListener, OnIt
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		return null;
 	}
 	

@@ -219,7 +219,7 @@ public class ViewIOC {
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				if (field.getInt(null) == id) {
-					return field.getName().toLowerCase();
+					return field.getName();
 				}
 			}
 		} catch (Exception e) {

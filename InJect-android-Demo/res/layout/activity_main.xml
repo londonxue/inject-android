@@ -135,6 +135,7 @@
                 android:layout_weight="1"
                 android:entries="@array/sex_arr"
                 android:focusable="false"
+                android:enabled = "false"
                 android:spinnerMode="dropdown"
                 android:textColor="#FF2316" />
         </LinearLayout>
