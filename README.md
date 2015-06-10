@@ -54,7 +54,7 @@ android注入，视图注入，资源注入，页面值自动绑定等
 	你只需在信息填写页面中为需要拿值的view中指定一个tag，就可以拿到整个页面的填写信息进行后台提交了
 	只需在展示页面、使View的id与数据的key保持，便可以自动注入值
 		
-![](/Volumes/Macintosh HD 2/git/inject-android/demo_screen.gif)
+![](https://github.com/mokai/inject-android/blob/master/demo_screen.gif?raw=true)
 
 比如一个用户信息编辑页面
 
